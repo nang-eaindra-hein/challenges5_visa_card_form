@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.font-tech {
+  font-family: "Share Tech Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.font-space {
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+}
