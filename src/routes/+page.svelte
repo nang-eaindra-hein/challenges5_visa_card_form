@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { fly } from "svelte/transition";
-
   let nameInput = $state("");
   let numberInput = $state("");
   let monthInput = $state("");
@@ -12,21 +10,45 @@
   let monthInputError = $state(false);
   let yearInputError = $state(false);
   let cvcInputError = $state(false);
-
   function handleConfirm() {
-    if (!nameInput) {
+    // reset errors
+    nameInputError = false;
+    numberInputError = false;
+    monthInputError = false;
+    yearInputError = false;
+    cvcInputError = false;
+
+    // NAME (letters only)
+    if (!/^[A-Za-z ]+$/.test(nameInput)) {
       nameInputError = true;
-    } else if (!numberInput) {
-      numberInputError = true;
-    } else if (!monthInput) {
-      monthInputError = true;
-    } else if (!yearInput) {
-      yearInputError = true;
-    } else if (!cvcInput) {
-      cvcInputError = true;
-    } else {
-      confirm = true;
+      return;
     }
+
+    // CARD NUMBER (16 digits)
+    if (!/^\d{16}$/.test(numberInput.replace(/\s/g, ""))) {
+      numberInputError = true;
+      return;
+    }
+
+    // MONTH (01–12)
+    if (!/^(0[1-9]|1[0-2])$/.test(monthInput)) {
+      monthInputError = true;
+      return;
+    }
+
+    // YEAR (2 digits)
+    if (!/^\d{2}$/.test(yearInput)) {
+      yearInputError = true;
+      return;
+    }
+
+    // CVC (3 digits)
+    if (!/^\d{3}$/.test(cvcInput)) {
+      cvcInputError = true;
+      return;
+    }
+
+    confirm = true;
   }
 </script>
 
@@ -53,9 +75,7 @@
   <p
     class="text-white absolute top-27 right-14 font-space z-20 text-xs lg:top-146 lg:text-lg lg:left-150"
   >
-    {#if cvcInput}
-      {cvcInput}
-    {:else}000{/if}
+    {cvcInput ? cvcInput.replace(/\D/g, "") : "000"}
   </p>
   <!--front card-->
   <img
@@ -69,25 +89,22 @@
     class="absolute z-30 top-40 w-14 h-8 left-12 lg:left-47 lg:top-60"
   />
   <div
-    class="text-white font-space absolute z-30 top-55 left-12 lg:top-90 lg:left-50"
+    class="text-white font-space absolute z-30 top-55 left-12 lg:top-90 lg:left-50 w-60 lg:w-80"
   >
-    <div class="text-lg lg:text-2xl tracking-widest pb-5">
-      {#if numberInput}
-        {numberInput}
-      {:else}
-        0000 0000 0000 0000{/if}
+    <div class="text-lg lg:text-2xl tracking-widest pb-5 w-full">
+      {numberInput
+        ? numberInput
+            .replace(/\D/g, "")
+            .replace(/(.{4})/g, "$1 ")
+            .trim()
+        : "0000 0000 0000 0000"}
     </div>
 
-    <div class="flex justify-between text-xs lg:text-md">
-      {#if nameInput}
-        {nameInput}
-      {:else}JANE APPLESEED{/if}
+    <div class="flex justify-between text-xs lg:text-md w-full">
+      {nameInput ? nameInput : "JANE APPLESEED"}
       <div class="flex">
-        {#if monthInput}
-          {monthInput}
-        {:else}00{/if}{#if yearInput}
-          /{yearInput}
-        {:else}/00{/if}
+        {monthInput ? monthInput.padStart(2, "0") : "00"}/
+        {yearInput ? yearInput : "00"}
       </div>
     </div>
   </div>
@@ -112,8 +129,6 @@
       <div class="space-y-2">
         <h1 class=" text-xs text-[#230c39]">Card number</h1>
         <input
-          in:fly={{ y: -10 }}
-          out:fly={{ y: 10 }}
           placeholder="e.g.1234 6789 1230 0000"
           type="tel"
           maxlength="16"
